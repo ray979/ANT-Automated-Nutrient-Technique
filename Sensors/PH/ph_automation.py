@@ -15,6 +15,7 @@ def GPIOSetup():
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.LOW)
 if __name__ == '__main__':
     try:
+        GPIOSetup()
         while True:
             #ph sensing from ad da board
 
