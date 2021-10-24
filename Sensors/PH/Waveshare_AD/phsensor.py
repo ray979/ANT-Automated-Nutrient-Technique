@@ -98,5 +98,5 @@ class PHSensor:
         Args:
             (int) pin: analog signal pin ph sensor module is connected on AD/DA board
         '''
-        print("PIN:A%d Voltage:%lf PH:%.2f"%(pin, self.read_voltage_mv(pin),self.read_ph(pin)))
+        print("PIN:A%d Voltage:%lf PH:%.2f"%(pin, self.read_voltage(pin),self.read_ph(pin)))
         print("\33[2A")

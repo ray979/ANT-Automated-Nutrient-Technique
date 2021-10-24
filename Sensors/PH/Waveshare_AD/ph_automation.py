@@ -6,7 +6,7 @@ import time
 
 
 PH_UP = 25
-PH_DOWN = 8
+PH_DOWN = 5
 
 PH_MIN = 5.5
 PH_MAX = 7
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         ph_sensor = phsensor.PHSensor(0,14) #phsensor object
         while True:
             #ph sensing from ad da board
-            ph = ph_sensor.read_ph(0)
+            ph = round(ph_sensor.read_ph(0),1)
 
             #if ph level is below range
             if ph < PH_MIN:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 print("PH DOWN pump off")
 
             #ph sensing interval
-            time.sleep(2)
+            time.sleep(60)
     except KeyboardInterrupt:
         GPIO.cleanup()
         sys.exit('PH balancing ended')
