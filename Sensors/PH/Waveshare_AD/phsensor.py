@@ -87,7 +87,7 @@ class PHSensor:
             for i in range(NUM_OF_SAMPLES):#read int NUM_OF_SAMPLES of mv voltage samples from AD/DA board
                 voltages_sum += self.read_voltage_mv(pin)
             
-            print(f"The average mv voltage for PH 7 is {voltages_sum/NUM_OF_SAMPLES}")
+            print(f"The average mv voltage for PH {ph_solution} is {voltages_sum/NUM_OF_SAMPLES}")
 
 
 
