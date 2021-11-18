@@ -3,8 +3,6 @@ import phsensor
 import sys
 import time
 
-
-
 PH_UP = 25
 PH_DOWN = 5
 
