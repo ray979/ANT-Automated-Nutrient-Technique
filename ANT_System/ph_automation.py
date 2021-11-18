@@ -3,6 +3,8 @@ import phsensor
 import sys
 import time
 
+PH_SENSOR_PIN = 0
+
 PH_UP = 25
 PH_DOWN = 5
 
@@ -13,7 +15,7 @@ def GPIOSetup():
     GPIO.setup(PH_UP, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.HIGH)
 
-def ph_automation(ph_reading):
+def ph_balancing(ph_reading,ph_min,ph_max):
     try:
         GPIO.setmode(GPIO.BCM)
         GPIOSetup()
@@ -22,7 +24,7 @@ def ph_automation(ph_reading):
             ph = round(ph_reading,1)
 
             #if ph level is below range
-            if ph < PH_MIN:
+            if ph < ph_min:
                 #turn on PH up pump
                 GPIO.output(PH_UP, GPIO.LOW)
                 print(f"PH UP pump on at PH:{ph}")
@@ -33,7 +35,7 @@ def ph_automation(ph_reading):
                 print("PH UP pump off")
 
             #if ph level is above range
-            if ph > PH_MAX:
+            if ph > ph_max:
                 #turn on PH down pump
                 GPIO.output(PH_DOWN, GPIO.LOW)
                 print(f"PH DOWN pump on at PH:{ph}")
@@ -53,38 +55,6 @@ def ph_automation(ph_reading):
 
 
 if __name__ == '__main__':
-    try:
-        GPIO.setmode(GPIO.BCM)
-        GPIOSetup()
-        ph_sensor = phsensor.PHSensor(0,14) #phsensor object
-        while True:
-            #ph sensing from ad da board
-            ph = round(ph_sensor.read_ph(0),1)
+    ph_sensor = phsensor.PHSensor(0,14) #phsensor object
+    ph_balancing(ph_sensor.read_ph(PH_SENSOR_PIN),PH_MIN,PH_MAX)
 
-            #if ph level is below range
-            if ph < PH_MIN:
-                #turn on PH up pump
-                GPIO.output(PH_UP, GPIO.LOW)
-                print(f"PH UP pump on at PH:{ph}")
-                #time.sleep(pump duration)
-                time.sleep(1)
-                #turn off PH up pump
-                GPIO.output(PH_UP, GPIO.HIGH)
-                print("PH UP pump off")
-
-            #if ph level is above range
-            if ph > PH_MAX:
-                #turn on PH down pump
-                GPIO.output(PH_DOWN, GPIO.LOW)
-                print(f"PH DOWN pump on at PH:{ph}")
-                #time.sleep(pump duration)
-                time.sleep(1)
-                #turn off PH down pump
-                GPIO.output(PH_DOWN, GPIO.HIGH)
-                print("PH DOWN pump off")
-
-            #ph sensing interval
-            time.sleep(60)
-    except KeyboardInterrupt:
-        GPIO.cleanup()
-        sys.exit('PH balancing ended')
