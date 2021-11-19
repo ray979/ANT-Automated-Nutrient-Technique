@@ -10,6 +10,7 @@ PH_SENSOR = 0
 PH_TOPIC = 'sensor/ph'
 
 ph_sensor = phsensor.PHSensor(0, 14)  # phsensor object
+ph = ph_sensor.read_ph(PH_SENSOR)
 
 client = mqtt.Client("ANT system")
 client.connect("localhost", 1883)
@@ -18,16 +19,16 @@ GPIO.setmode(GPIO.BCM)
 
 # method for ph reading and ph balancing
 def ph_sensing(pin):
+    global ph
     while True:
         ph = ph_sensor.read_ph(pin)
         client.publish(PH_TOPIC, round(ph, 2))
         time.sleep(0.5)
 
 # method for ph balancing
-def ph_balance(pin, ph_min, ph_max):
+def ph_balance(ph_min, ph_max):
     ph_automation.GPIOSetup_SS()
     while True:
-        ph = ph_sensor.read_ph(pin)
         ph_automation.ph_balancing_ss(ph, ph_min, ph_max)  #internal one minute delay
 
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
         t1.start()
-        ph_balance(PH_SENSOR,5.5,7)
+        ph_balance(5.5,7)
     except KeyboardInterrupt:
         GPIO.cleanup()
         os.system("clear") # clear terminal
