@@ -4,26 +4,51 @@ import phsensor
 import ph_automation
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
+import threading
 
-ph_sensor = phsensor.PHSensor(0,14) #phsensor object
+PH_SENSOR = 0
+PH_TOPIC = 'sensor/ph'
+
+ph_sensor = phsensor.PHSensor(0, 14)  # phsensor object
 
 client = mqtt.Client("ANT system")
-client.connect("localhost",1883)
+client.connect("localhost", 1883)
+
+GPIO.setmode(GPIO.BCM)
+
+# method for ph reading and ph balancing
+def ph_sensing(pin):
+    while True:
+        ph = ph_sensor.read_ph(pin)
+        client.publish(PH_TOPIC, round(ph, 2))
+        time.sleep(0.5)
+
+# method for ph balancing
+def ph_balance(pin, ph_min, ph_max):
+    ph_automation.GPIOSetup_SS()
+    while True:
+        ph = ph_sensor.read_ph(pin)
+        ph_automation.ph_balancing_ss(ph, ph_min, ph_max)  #internal one minute delay
+
+
+# method for light cycle
+def light_cycle():
+    pass
+
 
 if __name__ == '__main__':
     try:
         user_calibrate = input("Calibrate ph probe?(Y/N):")
         if user_calibrate == 'Y':
-            user_calibrate = input("Automatic or Manual Calibration(A/M):")
-            if user_calibrate == 'M':
-                ph_sensor.ph_calibration(0)
+            user_calibrate = input("Manual or Automatic Calibration(A/M):")
+            if(user_calibrate=="A"):
+                ph_sensor.automatic_ph_calibration(PH_SENSOR)
             else:
-                ph_sensor.automatic_ph_calibration(0)
-        while True:
-            ph_sensor.print_all(0) #print voltage and ph value of pin A0
-            topic = 'sensor/ph'
-            client.publish(topic,round(ph_sensor.read_ph(0),2))
-            time.sleep(0.5) #update every 0.5 seconds
+                ph_sensor.ph_calibration(PH_SENSOR)
+        t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
+        t1.daemon = True
+        t1.start()
+        ph_balance(PH_SENSOR,5.5,7)
     except KeyboardInterrupt:
         GPIO.cleanup()
         os.system("clear") # clear terminal

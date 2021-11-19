@@ -22,6 +22,8 @@ class PHSensor:
         (int) ph_max: maximum ph value ph sensor can read(default = 14)
     '''
     def __init__(self, ph_min = 0, ph_max = 14):
+        global PH7_VOLTAGE_MV
+        global PH4_VOLTAGE_MV
         self.ph_min = ph_min
         self.ph_max = ph_max
         try:
