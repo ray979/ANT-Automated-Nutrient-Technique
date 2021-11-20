@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import EC_Test2
 
 EC_A = 30
 EC_B = 35
