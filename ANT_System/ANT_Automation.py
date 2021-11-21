@@ -93,7 +93,7 @@ def ph_balancing_ss(ph_reading,ph_min,ph_max):
             
 def EC_Reading():
     #open serial port
-    ser=serial.Serial('/dev/ttyACM0', 115200)
+    ser=serial.Serial('$HOME/dev/ttyACM0', 115200)
 
     SensorData = str(ser.readline().decode("utf-8")).split(' ')
 
