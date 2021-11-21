@@ -73,9 +73,9 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
-        t2 = threading.Thread(target=light_cycle)
-        t2.daemon = True
-        t2.start()
+        #t2 = threading.Thread(target=light_cycle)
+        #t2.daemon = True
+        #t2.start()
         t1.start()
         ph_balance(5.5,7)
     except KeyboardInterrupt:
