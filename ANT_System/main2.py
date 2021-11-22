@@ -53,16 +53,21 @@ def light_cycle():
     GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
     while True:
         now = datetime.datetime.now()
+        hour = now.hour
+        minute = now.minute
         timestamp = now.strftime("%b %d, %Y %I:%M %p")
         #print(timestamp)
-        if(now.hour == LIGHT_ON_HOUR and now.minute == LIGHT_ON_MIN):
+        if(get_time_weight(hour,minute) == get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
             if(not GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_PIN,GPIO.HIGH)
             print(f"Light is on at {timestamp}")
-        elif(now.hour == LIGHT_OFF_HOUR and now.minute == LIGHT_OFF_MIN):
+        elif(get_time_weight(hour,minute) == get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             if(GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_OFF_HOUR,GPIO.LOW)
             print(f"Light is off at {timestamp}")
+
+def get_time_weight(hour,minute):
+    return hour + (minute / 60)
     
 
 
