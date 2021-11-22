@@ -2,13 +2,14 @@ import os
 import time
 import datetime
 import phsensor
-import ph_automation
+import automation
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import threading
 
 PH_SENSOR = 0
 PH_TOPIC = 'sensor/ph'
+EC_TOPIC = 'sensor/ec'
 
 LIGHT_PIN = 24
 LIGHT_ON_HOUR = 8
@@ -33,10 +34,13 @@ def ph_sensing(pin):
         time.sleep(0.5)
 
 # method for ph balancing
-def ph_balance(ph_min, ph_max):
-    ph_automation.GPIOSetup_SS()
+def ec_sensing_and_automation(ph_min, ph_max):
+    automation.GPIOSetup()
     while True:
-        ph_automation.ph_balancing_ss(ph, ph_min, ph_max)  #internal one minute delay
+        ec = automation.EC_Reading()
+        client.publish(EC_TOPIC, ec)
+        automation.EC_balancing(ec, automation.EC_MIN)
+        automation.ph_balancing(ph, ph_min, ph_max)  #internal one minute delay
 
 
 #method for ec sensing
@@ -77,7 +81,7 @@ if __name__ == '__main__':
         #t2.daemon = True
         #t2.start()
         t1.start()
-        ph_balance(5.5,7)
+        ec_sensing_and_automation(5.5,7)
     except KeyboardInterrupt:
         GPIO.cleanup()
         os.system("clear") # clear terminal
