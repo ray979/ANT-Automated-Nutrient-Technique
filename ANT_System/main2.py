@@ -8,6 +8,8 @@ import paho.mqtt.client as mqtt
 import threading
 
 PH_SENSOR = 0
+
+#MQTT Topics
 PH_TOPIC = 'sensor/ph'
 EC_TOPIC = 'sensor/ec'
 
@@ -20,43 +22,47 @@ LIGHT_OFF_MIN = 5
 ph_sensor = phsensor.PHSensor(0, 14)  # phsensor object
 ph = ph_sensor.read_ph(PH_SENSOR)
 
+ec = automation.EC_Reading()
+
 client = mqtt.Client("ANT system")
 client.connect("localhost", 1883)
 
 GPIO.setmode(GPIO.BCM)
 
-# method for ph reading and ph balancing
+# method for real time ph reading with interval of 0.5 seconds
 def ph_sensing(pin):
     global ph
     while True:
         ph = ph_sensor.read_ph(pin)
+        #publish ph reading to MQTT topic 'sensor/ph'
         client.publish(PH_TOPIC, round(ph, 2))
         time.sleep(0.5)
 
-# method for ph balancing
-def ec_sensing_and_automation(ph_min, ph_max):
-    automation.GPIOSetup()
+#method for ec sensing
+def ec_sensing():
+    global ec
     while True:
         ec = automation.EC_Reading()
-        client.publish(EC_TOPIC, ec)
+        #publish ec reading to MQTT topic 'sensor/ec'
+        client.publish(EC_TOPIC,round(ec,2))
+        time.sleep(0.5)
+
+# method for ph balancing
+def ant_automation(ph_min, ph_max):
+    automation.GPIOSetup()
+    while True:
         automation.EC_balancing(ec, automation.EC_MIN)
-        automation.ph_balancing(ph, ph_min, ph_max)  #internal one minute delay
-
-
-#method for ec sensing
-
-#method for ec automation
+        automation.ph_balancing(ph, ph_min, ph_max)
+        #one minute automation interval, allow time for solutions to mix
+        time.sleep(60)
 
 # method for light cycle
 def light_cycle():
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
     while True:
         now = datetime.datetime.now()
         hour = now.hour
         minute = now.minute
         timestamp = now.strftime("%b %d, %Y %I:%M %p")
-        #print(timestamp)
         if(get_time_weight(hour,minute) == get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
             if(not GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_PIN,GPIO.HIGH)
@@ -68,7 +74,27 @@ def light_cycle():
 
 def get_time_weight(hour,minute):
     return hour + (minute / 60)
-    
+
+# method for light at startup
+def light_cycle_startup():
+    GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
+    now = datetime.datetime.now()
+    hour = now.hour
+    minute = now.minute
+    timestamp = now.strftime("%b %d, %Y %I:%M %p")
+    if(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) > get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN):
+        if(get_time_weight(hour,minute) >= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) and get_time_weight(hour,minute) < get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
+            GPIO.output(LIGHT_PIN,GPIO.HIGH)
+        print(f"Light is on at {timestamp}")
+    elif((get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
+        if(get_time_weight(hour,minute) <= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) or get_time_weight(hour,minute) > get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
+            GPIO.output(LIGHT_PIN,GPIO.HIGH)
+        print(f"Light is on at {timestamp}")
+    else:
+        GPIO.output(LIGHT_PIN,GPIO.LOW)
+        print(f"Light is off at {timestamp}")
+
+
 
 
 if __name__ == '__main__':
@@ -82,13 +108,21 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
-        #t2 = threading.Thread(target=light_cycle)
-        #t2.daemon = True
-        #t2.start()
+        t2 = threading.Thread(target=ec_sensing)
+        t2.daemon = True
+        #t3 = threading.Thread(target=light_cycle)
+        #t3.daemon = True
+        #t3.start()
         t1.start()
-        ec_sensing_and_automation(5.5,7)
+        t2.start()
+        ant_automation(5.5,7)
     except KeyboardInterrupt:
         GPIO.cleanup()
         os.system("clear") # clear terminal
         print ("\r\nProgram end     ")
+        exit()
+    except:
+        GPIO.cleanup()
+        print("Something went wrong")
+        print("Program ended early....")
         exit()

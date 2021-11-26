@@ -19,13 +19,14 @@ EC_A = 30
 EC_B = 35
 EC_MIN = 17.50
 
-
+#GPIO Setup for Mechanical Relay Pins
 def GPIOSetup():
     GPIO.setup(PH_UP, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(EC_A, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(EC_B, GPIO.OUT, initial = GPIO.HIGH)
-    
+
+#GPIO Setup for Solid State Relay Pins    
 def GPIOSetup_SS():
     GPIO.setup(PH_UP, GPIO.OUT, initial = GPIO.LOW)
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.LOW)
@@ -58,9 +59,6 @@ def ph_balancing(ph_reading,ph_min,ph_max):
         #turn off PH down pump
         GPIO.output(PH_DOWN, GPIO.HIGH)
         print("PH DOWN pump off")
-
-    #ph sensing interval
-    time.sleep(60)
         
 def ph_balancing_ss(ph_reading,ph_min,ph_max):
     #ph sensing from ad da board
@@ -87,9 +85,6 @@ def ph_balancing_ss(ph_reading,ph_min,ph_max):
         #turn off PH down pump
         GPIO.output(PH_DOWN, GPIO.LOW)
         print("PH DOWN pump off")
-
-    #ph sensing interval
-    time.sleep(60)
             
 def EC_Reading():
     #open serial port
