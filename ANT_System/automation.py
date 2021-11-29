@@ -7,14 +7,14 @@ import serial
 
 PH_SENSOR_PIN = 0
 
-PH_UP = 7
-PH_DOWN = 18
+PH_UP = 24
+PH_DOWN = 25
 
 PH_MIN = 5.5
 PH_MAX = 7
 
-EC_A = 30
-EC_B = 35
+EC_A = 12
+EC_B = 16
 EC_MIN = 17.50
 
 ser=serial.Serial('/dev/ttyACM0', 115200)

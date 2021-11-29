@@ -32,6 +32,8 @@ import spidev
 import RPi.GPIO as GPIO
 import time
 
+GPIO.setmode(GPIO.BCM)
+
 # Pin definition
 RST_PIN         = 18
 CS_PIN       = 22
