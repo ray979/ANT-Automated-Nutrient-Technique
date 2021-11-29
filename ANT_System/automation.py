@@ -6,6 +6,7 @@ import os
 import string
 import re
 import serial
+import paho.mqtt.client as mqtt
 
 PH_SENSOR_PIN = 0
 
@@ -18,6 +19,8 @@ PH_MAX = 7
 EC_A = 30
 EC_B = 35
 EC_MIN = 17.50
+
+ser=serial.Serial('/dev/ttyACM0', 115200)
 
 #GPIO Setup for Mechanical Relay Pins
 def GPIOSetup():
@@ -48,6 +51,7 @@ def ph_balancing(ph_reading,ph_min,ph_max):
         #turn off PH up pump
         GPIO.output(PH_UP, GPIO.HIGH)
         print("PH UP pump off")
+        return 1
 
     #if ph level is above range
     if ph > ph_max:
@@ -59,6 +63,9 @@ def ph_balancing(ph_reading,ph_min,ph_max):
         #turn off PH down pump
         GPIO.output(PH_DOWN, GPIO.HIGH)
         print("PH DOWN pump off")
+        return 2
+
+    return 0
         
 def ph_balancing_ss(ph_reading,ph_min,ph_max):
     #ph sensing from ad da board
@@ -88,19 +95,24 @@ def ph_balancing_ss(ph_reading,ph_min,ph_max):
             
 def EC_Reading():
     #open serial port
-    ser=serial.Serial('$HOME/dev/ttyACM0', 115200)
-
     SensorData = str(ser.readline().decode("utf-8")).split(' ')
+    if (len(SensorData) > 1):
 
-    TempAvg = float(SensorData[0])
-    ECAvg = float(SensorData[1])
+        pattern = re.compile(r"[-]?[\d]+[.]?[\d]+") #real expression: Find numerical value in form "xx.xx"
 
-    print("Temp: ", TempAvg, "EC: ", ECAvg, "\n")
-    return ECAvg
+        try:
+            temp_value = float(pattern.search(SensorData[0]).group()) #apply real expression to serial data
+            ec_value = float(pattern.search(SensorData[1]).group())
+            return ec_value
+            #print(f'Temperature:{temp_value} EC:{ec_value}')
+        except AttributeError as e: #if real expression return None
+            print(e)
+
+
+
 
 def EC_balancing(EC_reading,EC_min):
     #if EC level is below range, turn on pump
-    EC_reading =  EC_Reading()
     if EC_reading < EC_min:
         #turn on EC pumps
         GPIO.output(EC_A, GPIO.LOW)

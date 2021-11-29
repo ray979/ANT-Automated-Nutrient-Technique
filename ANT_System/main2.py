@@ -12,6 +12,7 @@ PH_SENSOR = 0
 #MQTT Topics
 PH_TOPIC = 'sensor/ph'
 EC_TOPIC = 'sensor/ec'
+AUTOMATION_TOPIC = 'automation/pumps'
 
 LIGHT_PIN = 24
 LIGHT_ON_HOUR = 8
@@ -41,10 +42,11 @@ def ph_sensing(pin):
 #method for ec sensing
 def ec_sensing():
     global ec
+    #time.sleep(0.5)
     while True:
         ec = automation.EC_Reading()
         #publish ec reading to MQTT topic 'sensor/ec'
-        client.publish(EC_TOPIC,round(ec,2))
+        client.publish(EC_TOPIC,ec)
         time.sleep(0.5)
 
 # method for ph balancing
@@ -52,7 +54,11 @@ def ant_automation(ph_min, ph_max):
     automation.GPIOSetup()
     while True:
         automation.EC_balancing(ec, automation.EC_MIN)
-        automation.ph_balancing(ph, ph_min, ph_max)
+        ph_auto_code = automation.ph_balancing(ph, ph_min, ph_max)
+        if(ph_auto_code == 1):
+            client.publish(AUTOMATION_TOPIC,"PH UP PUMP TURNED ON")
+        elif(ph_auto_code == 2):
+            client.publish(AUTOMATION_TOPIC,"PH DOWN PUMP TURNED ON")
         #one minute automation interval, allow time for solutions to mix
         time.sleep(60)
 
@@ -82,11 +88,11 @@ def light_cycle_startup():
     hour = now.hour
     minute = now.minute
     timestamp = now.strftime("%b %d, %Y %I:%M %p")
-    if(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) > get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN):
+    if(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) > get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
         if(get_time_weight(hour,minute) >= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) and get_time_weight(hour,minute) < get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
         print(f"Light is on at {timestamp}")
-    elif((get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
+    elif(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
         if(get_time_weight(hour,minute) <= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) or get_time_weight(hour,minute) > get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
         print(f"Light is on at {timestamp}")
@@ -108,7 +114,7 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
-        t2 = threading.Thread(target=ec_sensing)
+        t2 = threading.Thread(target=ec_sensing, args=())
         t2.daemon = True
         #t3 = threading.Thread(target=light_cycle)
         #t3.daemon = True
@@ -121,8 +127,9 @@ if __name__ == '__main__':
         os.system("clear") # clear terminal
         print ("\r\nProgram end     ")
         exit()
-    except:
+    except Exception as e:
         GPIO.cleanup()
         print("Something went wrong")
+        print(e)
         print("Program ended early....")
         exit()
