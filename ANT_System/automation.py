@@ -2,11 +2,8 @@ import RPi.GPIO as GPIO
 import phsensor
 import sys
 import time
-import os
-import string
 import re
 import serial
-import paho.mqtt.client as mqtt
 
 PH_SENSOR_PIN = 0
 
