@@ -15,7 +15,7 @@ PH_MAX = 7
 
 EC_A = 12
 EC_B = 16
-EC_MIN = 17.50
+EC_MIN = 1.2
 
 ser=serial.Serial('/dev/ttyACM0', 115200)
 
@@ -124,6 +124,8 @@ def EC_balancing(EC_reading,EC_min):
         time.sleep(2)
         GPIO.output(EC_B, GPIO.HIGH)
         print("Solution B pump off")
+        return 1
+    return 0
 
 if __name__ == '__main__':
     try:

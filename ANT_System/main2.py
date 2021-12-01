@@ -53,14 +53,19 @@ def ec_sensing():
 def ant_automation(ph_min, ph_max):
     automation.GPIOSetup()
     while True:
-        automation.EC_balancing(ec, automation.EC_MIN)
+        ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
+        if(ec_auto_code == 1):
+            client.publish(AUTOMATION_TOPIC,"Nutrient A and B dosed")
+            time.sleep(1200) #wait 20 min for nutrients to mix
         ph_auto_code = automation.ph_balancing(ph, ph_min, ph_max)
         if(ph_auto_code == 1):
-            client.publish(AUTOMATION_TOPIC,"PH UP PUMP TURNED ON")
+            client.publish(AUTOMATION_TOPIC,"PH UP dosed")
+            time.sleep(900) #wait 15 min for ph adjuster to mix
         elif(ph_auto_code == 2):
-            client.publish(AUTOMATION_TOPIC,"PH DOWN PUMP TURNED ON")
-        #one minute automation interval, allow time for solutions to mix
-        time.sleep(60)
+            client.publish(AUTOMATION_TOPIC,"PH DOWN dosed")
+            time.sleep(900)
+        #ten minute automation interval
+        time.sleep(600)
 
 # method for light cycle
 def light_cycle():
