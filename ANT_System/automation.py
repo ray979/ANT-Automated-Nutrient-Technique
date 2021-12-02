@@ -106,8 +106,6 @@ def EC_Reading():
             print(e)
 
 
-
-
 def EC_balancing(EC_reading,EC_min):
     #if EC level is below range, turn on pump
     if EC_reading < EC_min:
@@ -117,6 +115,8 @@ def EC_balancing(EC_reading,EC_min):
         time.sleep(1)
         GPIO.output(EC_A, GPIO.HIGH)
         print("Solution A pump off")
+
+        time.sleep(180) # three minute for concentrate to mix
 
         #then Solution B
         GPIO.output(EC_B, GPIO.LOW)
