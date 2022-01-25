@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import phsensor
+import ecsensor
 import sys
 import time
 import re
@@ -89,7 +90,7 @@ def ph_balancing_ss(ph_reading,ph_min,ph_max):
         #turn off PH down pump
         GPIO.output(PH_DOWN, GPIO.LOW)
         print("PH DOWN pump off")
-            
+'''
 def EC_Reading():
     #open serial port
     SensorData = str(ser.readline().decode("utf-8")).split(' ')
@@ -104,7 +105,7 @@ def EC_Reading():
             #print(f'Temperature:{temp_value} EC:{ec_value}')
         except AttributeError as e: #if real expression return None
             print(e)
-
+'''
 
 def EC_balancing(EC_reading,EC_min):
     #if EC level is below range, turn on pump
@@ -132,9 +133,10 @@ if __name__ == '__main__':
         GPIO.setmode(GPIO.BCM)
         GPIOSetup_SS()
         ph_sensor = phsensor.PHSensor(0,14) #phsensor object
+        ec_sensor = ecsensor.ECSensor() #ec object
         while True:
             ph_balancing_ss(ph_sensor.read_ph(PH_SENSOR_PIN),PH_MIN,PH_MAX)
-            EC_balancing(EC_Reading(), EC_MIN)
+            EC_balancing(ec_sensor.readEC(EC_SENSOR_PIN), EC_MIN)
     except KeyboardInterrupt:
         GPIO.cleanup()
-        sys.exit('PH balancing ended')
+        sys.exit('PH and EC balancing ended')
