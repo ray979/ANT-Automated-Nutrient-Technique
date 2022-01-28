@@ -11,7 +11,6 @@ import threading
 #PH and EC sensor ADC Pins
 PH_SENSOR = 0
 EC_SENSOR = 1
-<<<<<<< HEAD
 
 PH_MIN = 5.5
 PH_MAX = 7
@@ -23,8 +22,6 @@ ph = ph_sensor.read_ph(PH_SENSOR)
 #ec = automation.EC_Reading()
 ec_sensor = ecsensor.ECSensor() #ec sensor object
 ec = ec_sensor.readEC(1)
-=======
->>>>>>> 8793b89e645441b865aa5984686e56c42e2e9050
 
 #MQTT Topics
 PH_TOPIC = 'sensor/ph'
