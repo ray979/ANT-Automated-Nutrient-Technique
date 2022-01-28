@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>PH monitoring monitor</title>
+</head>
+
+<body>
+    <div>
+        <div class="container">
+            <h1>PH monitoring monitor</h1>
+            <h2 id="time">time</h2>
+            <h2 id="PH">PH</h2>
+        </div>
+    </div>
+    <script>
+        //Obtaining greenhouse degree value from server
+        var sensor_read = function () {
+            fetch("/sensordata", {
+                method: 'GET'
+            }).then((response) => {
+                return response.json();
+            }).then((data) => {
+                console.log(data);
+                var time = document.querySelector("#time")
+                time.innerHTML = data.time
+                var PH = document.querySelector("#PH")
+                PH.innerHTML = `PH:${data.PH}`
+            }).catch((err) => {
+                console.error(err);
+            });
+        };
+
+        //5 second timer
+        setInterval(sensor_read, 1000);
+    </script>
+</body>
+
+</html>

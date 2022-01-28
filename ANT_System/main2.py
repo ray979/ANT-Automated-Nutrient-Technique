@@ -98,14 +98,13 @@ client.on_message = on_message
 client.subscribe(settings_topic)
 client.loop_start()
 
-
-GPIO.setmode(GPIO.BCM)
-
 # method for real time ph reading with interval of 0.5 seconds
 def ph_sensing(pin):
     global ph
     while True:
+        lock.acquire()
         ph = ph_sensor.read_ph(pin)
+        lock.release()
         #publish ph reading to MQTT topic 'sensor/ph'
         client.publish(PH_TOPIC, round(ph, 2))
         time.sleep(0.5)
@@ -115,7 +114,9 @@ def ec_sensing(pin):
     global ec
     #time.sleep(0.5)
     while True:
+        lock.acquire()
         ec = ec_sensor.readEC(pin)
+        lock.release()
         #publish ec reading to MQTT topic 'sensor/ec'
         client.publish(EC_TOPIC,ec)
         time.sleep(0.5)
@@ -175,8 +176,6 @@ def light_cycle_startup():
     else:
         GPIO.output(LIGHT_PIN,GPIO.LOW)
         print(f"Light is off at {timestamp}")
-
-
 
 
 if __name__ == '__main__':
