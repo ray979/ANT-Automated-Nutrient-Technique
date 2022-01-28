@@ -2,31 +2,102 @@ import os
 import time
 import datetime
 import phsensor
+import ecsensor
 import automation
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import threading
 
+#PH and EC sensor ADC Pins
 PH_SENSOR = 0
+EC_SENSOR = 1
+
+PH_MIN = 5.5
+PH_MAX = 7
+
+ph_sensor = phsensor.PHSensor(0, 14)  # phsensor object
+ph = ph_sensor.read_ph(PH_SENSOR)
+
+
+#ec = automation.EC_Reading()
+ec_sensor = ecsensor.ECSensor() #ec sensor object
+ec = ec_sensor.readEC(1)
 
 #MQTT Topics
 PH_TOPIC = 'sensor/ph'
 EC_TOPIC = 'sensor/ec'
 AUTOMATION_TOPIC = 'automation/pumps'
 
-LIGHT_PIN = 24
+settings_topic =[
+    ('/PHMINSET',0),
+    ('/PHMAXSET',0),
+    ('/ECMINSET',0),
+    ('/LIGHSTARTSET',0),
+    ('/LIGHTENDSTART',0)
+]
+
+#Light Cycle Settings
+LIGHT_PIN = 5
 LIGHT_ON_HOUR = 8
 LIGHT_ON_MIN = 0
 LIGHT_OFF_HOUR = 18
 LIGHT_OFF_MIN = 5
 
-ph_sensor = phsensor.PHSensor(0, 14)  # phsensor object
-ph = ph_sensor.read_ph(PH_SENSOR)
+#thread lock
+lock = threading.Lock()
 
-ec = automation.EC_Reading()
+def on_message(client, userdata, message):
+    '''
+    MQTT On message method callback. Changes setting values based on mqtt message to topic.
+    '''
+    global PH_MIN
+    global PH_MAX
+    global EC_MIN
+    global LIGHT_ON_HOUR
+    global LIGHT_OFF_HOUR
 
+    try:
+        if(message.topic == settings_topic[0][0]):
+            print(f'The message is {str(message.payload.decode("utf-8"))}')
+            lock.acquire()
+            PH_MIN = round(float(str(message.payload.decode("utf-8"))),2)
+            print(f'PH Min value changed {PH_MIN}')
+            lock.release()
+        elif(message.topic == settings_topic[1][0]):
+            print(f'The message is {str(message.payload.decode("utf-8"))}')
+            lock.acquire()
+            PH_MAX = round(float(str(message.payload.decode("utf-8"))),2)
+            print(f'PH Max value changed {PH_MAX}')
+            lock.release()
+        elif(message.topic == settings_topic[2][0]):
+            print(f'The message is {str(message.payload.decode("utf-8"))}')
+            lock.acquire()
+            EC_MIN = round(float(str(message.payload.decode("utf-8"))),2)
+            print(f'EC Min value changed {EC_MIN}')
+            lock.release()
+        elif(message.topic == settings_topic[3][0]):
+            print(f'The message is {str(message.payload.decode("utf-8"))}')
+            lock.acquire()
+            LIGHT_ON_HOUR = round(float(str(message.payload.decode("utf-8"))),2)
+            print(f'LIGHT Start Hour value changed {LIGHT_ON_HOUR}')
+            lock.release()
+        elif(message.topic == settings_topic[4][0]):
+            print(f'The message is {str(message.payload.decode("utf-8"))}')
+            lock.acquire()
+            LIGHT_OFF_HOUR = round(float(str(message.payload.decode("utf-8"))),2)
+            print(f'LIGHT Off Hour value changed {LIGHT_OFF_HOUR}')
+            lock.release()
+    except ValueError as e:
+        print("Cannot convert string to float")
+
+
+#MQTT Client connect and topic subscriptions
 client = mqtt.Client("ANT system")
 client.connect("localhost", 1883)
+client.on_message = on_message
+client.subscribe(settings_topic)
+client.loop_start()
+
 
 GPIO.setmode(GPIO.BCM)
 
@@ -40,11 +111,11 @@ def ph_sensing(pin):
         time.sleep(0.5)
 
 #method for ec sensing
-def ec_sensing():
+def ec_sensing(pin):
     global ec
     #time.sleep(0.5)
     while True:
-        ec = automation.EC_Reading()
+        ec = ec_sensor.readEC(pin)
         #publish ec reading to MQTT topic 'sensor/ec'
         client.publish(EC_TOPIC,ec)
         time.sleep(0.5)
@@ -119,7 +190,7 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
-        t2 = threading.Thread(target=ec_sensing, args=())
+        t2 = threading.Thread(target=ec_sensing, args=(EC_SENSOR,))
         t2.daemon = True
         #t3 = threading.Thread(target=light_cycle)
         #t3.daemon = True
@@ -128,6 +199,7 @@ if __name__ == '__main__':
         t2.start()
         ant_automation(5.5,7)
     except KeyboardInterrupt:
+        client.loop_stop()
         GPIO.cleanup()
         os.system("clear") # clear terminal
         print ("\r\nProgram end     ")
