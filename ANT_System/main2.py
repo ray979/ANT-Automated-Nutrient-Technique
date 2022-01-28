@@ -11,6 +11,7 @@ import threading
 #PH and EC sensor ADC Pins
 PH_SENSOR = 0
 EC_SENSOR = 1
+<<<<<<< HEAD
 
 PH_MIN = 5.5
 PH_MAX = 7
@@ -22,6 +23,8 @@ ph = ph_sensor.read_ph(PH_SENSOR)
 #ec = automation.EC_Reading()
 ec_sensor = ecsensor.ECSensor() #ec sensor object
 ec = ec_sensor.readEC(1)
+=======
+>>>>>>> 8793b89e645441b865aa5984686e56c42e2e9050
 
 #MQTT Topics
 PH_TOPIC = 'sensor/ph'
@@ -121,7 +124,7 @@ def ec_sensing(pin):
         time.sleep(0.5)
 
 # method for ph balancing
-def ant_automation(ph_min, ph_max):
+def ant_automation(ph_min, ph_max, ec_min):
     automation.GPIOSetup()
     while True:
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
@@ -197,7 +200,7 @@ if __name__ == '__main__':
         #t3.start()
         t1.start()
         t2.start()
-        ant_automation(5.5,7)
+        ant_automation(5.5,7, 17.50)
     except KeyboardInterrupt:
         client.loop_stop()
         GPIO.cleanup()
