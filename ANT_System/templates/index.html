@@ -14,7 +14,6 @@
         </div>
     </div>
     <script>
-        //Obtaining greenhouse degree value from server
         var sensor_read = function () {
             fetch("/sensordata", {
                 method: 'GET'
@@ -30,8 +29,6 @@
                 console.error(err);
             });
         };
-
-        //5 second timer
         setInterval(sensor_read, 1000);
     </script>
 </body>
