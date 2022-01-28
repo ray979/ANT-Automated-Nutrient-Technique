@@ -8,7 +8,9 @@ import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import threading
 
+#PH and EC sensor ADC Pins
 PH_SENSOR = 0
+EC_SENSOR = 1
 
 #MQTT Topics
 PH_TOPIC = 'sensor/ph'
@@ -26,7 +28,7 @@ ph = ph_sensor.read_ph(PH_SENSOR)
 
 #ec = automation.EC_Reading()
 ec_sensor = ecsensor.ECSensor() #ec sensor object
-ec = ec_sensor.readEC(2)
+ec = ec_sensor.readEC(1)
 
 client = mqtt.Client("ANT system")
 client.connect("localhost", 1883)
@@ -122,7 +124,7 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
-        t2 = threading.Thread(target=ec_sensing, args=())
+        t2 = threading.Thread(target=ec_sensing, args=(EC_SENSOR,))
         t2.daemon = True
         #t3 = threading.Thread(target=light_cycle)
         #t3.daemon = True

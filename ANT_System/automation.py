@@ -7,6 +7,7 @@ import re
 import serial
 
 PH_SENSOR_PIN = 0
+EC_SENSOR_PIN = 1
 
 PH_UP = 24
 PH_DOWN = 25
@@ -18,7 +19,7 @@ EC_A = 12
 EC_B = 16
 EC_MIN = 1.2
 
-ser=serial.Serial('/dev/ttyACM0', 115200)
+#ser=serial.Serial('/dev/ttyACM0', 115200)
 
 #GPIO Setup for Mechanical Relay Pins
 def GPIOSetup():
