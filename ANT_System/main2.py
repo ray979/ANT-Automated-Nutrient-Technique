@@ -195,11 +195,11 @@ if __name__ == '__main__':
         t1.daemon = True
         t2 = threading.Thread(target=ec_sensing, args=(EC_SENSOR,))
         t2.daemon = True
-        t3 = threading.Thread(target=light_cycle)
-        t3.daemon = True
+#        t3 = threading.Thread(target=light_cycle)
+#        t3.daemon = True
         t1.start()
         t2.start()
-        t3.start()
+#        t3.start()
         ant_automation(5.5,7, 17.50)
         #automation.light_test()
 
