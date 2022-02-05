@@ -27,6 +27,7 @@ def GPIOSetup():
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(EC_A, GPIO.OUT, initial = GPIO.HIGH)
     GPIO.setup(EC_B, GPIO.OUT, initial = GPIO.HIGH)
+    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
 
 #GPIO Setup for Solid State Relay Pins    
 def GPIOSetup_SS():
@@ -130,6 +131,7 @@ def EC_balancing(EC_reading,EC_min):
     return 0
 
 def light_test():
+    
     GPIO.output(5, GPIO.HIGH)
 
 if __name__ == '__main__':
