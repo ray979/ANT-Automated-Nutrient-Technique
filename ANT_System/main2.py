@@ -201,7 +201,7 @@ if __name__ == '__main__':
         t1.start()
         t2.start()
         ant_automation(5.5,7, 17.50)
-        automation.light_test()
+        #automation.light_test()
 
     except KeyboardInterrupt:
         client.loop_stop()
