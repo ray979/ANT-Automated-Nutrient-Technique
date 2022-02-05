@@ -35,6 +35,7 @@ def GPIOSetup_SS():
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.LOW)
     GPIO.setup(EC_A, GPIO.OUT, initial = GPIO.LOW)
     GPIO.setup(EC_B, GPIO.OUT, initial = GPIO.LOW)
+    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
 
 
 def ph_balancing(ph_reading,ph_min,ph_max):
