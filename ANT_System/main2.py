@@ -141,6 +141,8 @@ def ant_automation(ph_min, ph_max, ec_min):
 
 # method for light cycle
 def light_cycle():
+#    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
+    light_cycle_startup()
     while True:
         now = datetime.datetime.now()
         hour = now.hour
