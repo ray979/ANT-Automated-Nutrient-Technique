@@ -69,5 +69,5 @@ class ECSensor:
         elif(valueTemp < 2.0):
           _kvalue = _kvalueLow
         value = rawEC * _kvalue
-        value = value / (1.0+0.0185*(temperature-25.0))
+        value = (value / (1.0+0.0185*(temperature-25.0))) * 1000
         return value
