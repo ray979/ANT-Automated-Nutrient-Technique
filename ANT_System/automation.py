@@ -130,7 +130,7 @@ def EC_balancing(EC_reading,EC_min):
     return 0
 
 def light_test():
-    GPIO.output(5, GPIO.HIGH);
+    GPIO.output(5, GPIO.HIGH)
 
 if __name__ == '__main__':
     try:
