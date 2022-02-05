@@ -129,6 +129,9 @@ def EC_balancing(EC_reading,EC_min):
         return 1
     return 0
 
+def light_test():
+    GPIO.output(5, GPIO.HIGH);
+
 if __name__ == '__main__':
     try:
         GPIO.setmode(GPIO.BCM)
