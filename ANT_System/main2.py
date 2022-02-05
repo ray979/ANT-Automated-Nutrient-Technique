@@ -187,7 +187,6 @@ if __name__ == '__main__':
                 ph_sensor.automatic_ph_calibration(PH_SENSOR)
             else:
                 ph_sensor.ph_calibration(PH_SENSOR)
-        automation.light_test()
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
         t2 = threading.Thread(target=ec_sensing, args=(EC_SENSOR,))
@@ -198,6 +197,8 @@ if __name__ == '__main__':
         t1.start()
         t2.start()
         ant_automation(5.5,7, 17.50)
+        automation.light_test()
+
     except KeyboardInterrupt:
         client.loop_stop()
         GPIO.cleanup()
