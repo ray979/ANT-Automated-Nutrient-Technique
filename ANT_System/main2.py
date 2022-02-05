@@ -143,6 +143,7 @@ def ant_automation(ph_min, ph_max, ec_min):
 def light_cycle():
 #    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
     light_cycle_startup()
+    '''
     while True:
         now = datetime.datetime.now()
         hour = now.hour
@@ -156,7 +157,8 @@ def light_cycle():
             if(GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_OFF_HOUR,GPIO.LOW)
             print(f"Light is off at {timestamp}")
-
+    '''
+        
 def get_time_weight(hour,minute):
     return hour + (minute / 60)
 
