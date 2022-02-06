@@ -41,7 +41,7 @@ LIGHT_PIN = 5
 LIGHT_ON_HOUR = 8
 LIGHT_ON_MIN = 0
 LIGHT_OFF_HOUR = 18
-LIGHT_OFF_MIN = 16
+LIGHT_OFF_MIN = 0
 
 #thread lock
 lock = threading.Lock()
