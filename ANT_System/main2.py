@@ -41,7 +41,7 @@ LIGHT_PIN = 5
 LIGHT_ON_HOUR = 8
 LIGHT_ON_MIN = 0
 LIGHT_OFF_HOUR = 18
-LIGHT_OFF_MIN = 5
+LIGHT_OFF_MIN = 16
 
 #thread lock
 lock = threading.Lock()
@@ -123,7 +123,6 @@ def ec_sensing(pin):
 
 # method for ph balancing
 def ant_automation(ph_min, ph_max, ec_min):
-    automation.GPIOSetup()
     while True:
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
         if(ec_auto_code == 1):
@@ -141,30 +140,29 @@ def ant_automation(ph_min, ph_max, ec_min):
 
 # method for light cycle
 def light_cycle():
-#    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
     light_cycle_startup()
-    '''
     while True:
         now = datetime.datetime.now()
         hour = now.hour
         minute = now.minute
+        second = now.second
         timestamp = now.strftime("%b %d, %Y %I:%M %p")
         if(get_time_weight(hour,minute) == get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
             if(not GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_PIN,GPIO.HIGH)
-            print(f"Light is on at {timestamp}")
+                print(f"Light is on at {timestamp}")
+                time.sleep(60-second+1)
         elif(get_time_weight(hour,minute) == get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             if(GPIO.input(LIGHT_PIN)):
-                GPIO.output(LIGHT_OFF_HOUR,GPIO.LOW)
-            print(f"Light is off at {timestamp}")
-    '''
-        
+                GPIO.output(LIGHT_PIN,GPIO.LOW)
+                print(f"Light is off at {timestamp}")
+                time.sleep(60-second+1)
+
 def get_time_weight(hour,minute):
     return hour + (minute / 60)
 
 # method for light at startup
 def light_cycle_startup():
-    GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
     now = datetime.datetime.now()
     hour = now.hour
     minute = now.minute
@@ -172,14 +170,17 @@ def light_cycle_startup():
     if(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) > get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
         if(get_time_weight(hour,minute) >= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) and get_time_weight(hour,minute) < get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
-        print(f"Light is on at {timestamp}")
+            print(f"Light is on at {timestamp}")
+        else:
+            GPIO.output(LIGHT_PIN,GPIO.LOW)
+            print(f"Light is off at {timestamp}")
     elif(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
         if(get_time_weight(hour,minute) <= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) or get_time_weight(hour,minute) > get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
-        print(f"Light is on at {timestamp}")
-    else:
-        GPIO.output(LIGHT_PIN,GPIO.LOW)
-        print(f"Light is off at {timestamp}")
+            print(f"Light is on at {timestamp}")
+        else:
+            GPIO.output(LIGHT_PIN,GPIO.LOW)
+            print(f"Light is off at {timestamp}")
 
 
 if __name__ == '__main__':
@@ -191,23 +192,27 @@ if __name__ == '__main__':
                 ph_sensor.automatic_ph_calibration(PH_SENSOR)
             else:
                 ph_sensor.ph_calibration(PH_SENSOR)
+
+        #GPIO Pin setup
+        automation.GPIOSetup()
+        GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
+
         t1 = threading.Thread(target=ph_sensing, args=(PH_SENSOR,))
         t1.daemon = True
         t2 = threading.Thread(target=ec_sensing, args=(EC_SENSOR,))
         t2.daemon = True
-#        t3 = threading.Thread(target=light_cycle)
-#        t3.daemon = True
+        t3 = threading.Thread(target=light_cycle)
+        t3.daemon = True
         t1.start()
         t2.start()
-#        t3.start()
+        t3.start()
         ant_automation(5.5,7, 17.50)
-        #automation.light_test()
-
     except KeyboardInterrupt:
+        GPIO.output(5,GPIO.LOW)
         client.loop_stop()
-        GPIO.cleanup()
         os.system("clear") # clear terminal
         print ("\r\nProgram end     ")
+        GPIO.cleanup()
         exit()
     except Exception as e:
         GPIO.cleanup()
