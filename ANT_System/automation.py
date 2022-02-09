@@ -123,7 +123,7 @@ def EC_balancing(EC_reading,EC_min):
 
         #then Solution B
         GPIO.output(EC_B, GPIO.LOW)
-        print("Starting pump for Solution A")
+        print("Starting pump for Solution B")
         time.sleep(2)
         GPIO.output(EC_B, GPIO.HIGH)
         print("Solution B pump off")
