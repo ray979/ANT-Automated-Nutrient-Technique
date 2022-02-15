@@ -1,2 +1,5 @@
 *.pyc
 *.pyo
+ANT_System/__pycache__/ADS1256.cpython-37.pyc
+ANT_System/__pycache__/config.cpython-37.pyc
+ANT_System/__pycache__/phsensor.cpython-37.pyc
