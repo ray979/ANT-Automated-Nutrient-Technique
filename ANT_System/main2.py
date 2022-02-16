@@ -194,6 +194,7 @@ if __name__ == '__main__':
                 ph_sensor.ph_calibration(PH_SENSOR)
 
         #GPIO Pin setup
+        GPIO.setmode(GPIO.BCM)
         automation.GPIOSetup()
         GPIO.setup(LIGHT_PIN, GPIO.OUT, initial = GPIO.LOW)
 
