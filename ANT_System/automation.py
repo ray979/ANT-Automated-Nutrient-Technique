@@ -9,8 +9,8 @@ import serial
 PH_SENSOR_PIN = 0
 EC_SENSOR_PIN = 1
 
-PH_UP = 12
-PH_DOWN = 16
+PH_UP = 16
+PH_DOWN = 12
 
 PH_MIN = 5.5
 PH_MAX = 7
@@ -34,8 +34,6 @@ def GPIOSetup_SS():
     GPIO.setup(PH_DOWN, GPIO.OUT, initial = GPIO.LOW)
     GPIO.setup(EC_A, GPIO.OUT, initial = GPIO.LOW)
     GPIO.setup(EC_B, GPIO.OUT, initial = GPIO.LOW)
-    GPIO.setup(5, GPIO.OUT, initial = GPIO.LOW)
-
 
 def ph_balancing(ph_reading,ph_min,ph_max):
     #ph sensing from ad da board
