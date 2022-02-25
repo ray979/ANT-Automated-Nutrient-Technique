@@ -33,7 +33,7 @@ settings_topic =[
     ('/PHMAXSET',0),
     ('/ECMINSET',0),
     ('/LIGHSTARTSET',0),
-    ('/LIGHTENDSTART',0)
+    ('/LIGHTENDSET',0)
 ]
 
 #Light Cycle Settings
