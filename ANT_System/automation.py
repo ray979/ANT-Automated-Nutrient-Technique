@@ -9,8 +9,8 @@ import serial
 PH_SENSOR_PIN = 0
 EC_SENSOR_PIN = 1
 
-PH_UP = 16
-PH_DOWN = 12
+PH_UP = 12
+PH_DOWN = 16
 
 PH_MIN = 5.5
 PH_MAX = 7
