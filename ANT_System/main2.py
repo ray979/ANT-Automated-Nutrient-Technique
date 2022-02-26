@@ -7,6 +7,8 @@ import automation
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import threading
+import requests
+import json
 
 #PH and EC sensor ADC Pins
 PH_SENSOR = 0
@@ -27,6 +29,9 @@ ec = ec_sensor.readEC(1)
 PH_TOPIC = 'sensor/ph'
 EC_TOPIC = 'sensor/ec'
 AUTOMATION_TOPIC = 'automation/pumps'
+
+#Last saved to database
+LAST_SAVED_TO_DATABASE = 0
 
 settings_topic =[
     ('/PHMINSET',0),
@@ -97,6 +102,18 @@ client.connect("localhost", 1883)
 client.on_message = on_message
 client.subscribe(settings_topic)
 client.loop_start()
+
+#method for saving sensordata into database
+def save_sensordata_to_database(ph,ec):
+    new_sensor_data = {
+        "ph":ph,
+        "ec":ec
+    }
+    try:
+        request = requests.post("http://127.0.0.1:8000/sensordata", json.dumps(newsensordata,indent=3))
+        print(request.text)
+    except Exception as e:
+        print("Could not save sensor data into database")
 
 # method for real time ph reading with interval of 0.5 seconds
 def ph_sensing(pin):
