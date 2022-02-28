@@ -31,7 +31,7 @@ EC_TOPIC = 'sensor/ec'
 AUTOMATION_TOPIC = 'automation/pumps'
 
 #Last saved to database
-LAST_SAVED_TO_DATABASE = 0
+LAST_SAVED_TO_DATABASE = None
 
 settings_topic =[
     ('/PHMINSET',0),
@@ -141,6 +141,9 @@ def ec_sensing(pin):
 # method for ph balancing
 def ant_automation(ph_min, ph_max, ec_min):
     while True:
+        if(LAST_SAVED_TO_DATABASE is not None):
+            if((LAST_SAVED_TO_DATABASE + datetime.timedelta(minutes = 30)) < datetime.datetime.now()):
+                save_sensordata_to_database(ph,ec)
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
         if(ec_auto_code == 1):
             client.publish(AUTOMATION_TOPIC,"Nutrient A and B dosed")
