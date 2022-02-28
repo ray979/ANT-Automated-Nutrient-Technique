@@ -11,6 +11,7 @@
             <h1>PH monitoring monitor</h1>
             <h2 id="time">time</h2>
             <h2 id="PH">PH</h2>
+            <h2 id="EC">EC</h2>
         </div>
     </div>
     <script>
@@ -25,6 +26,8 @@
                 time.innerHTML = data.time
                 var PH = document.querySelector("#PH")
                 PH.innerHTML = `PH:${data.PH}`
+                var EC = document.querySelector("#EC")
+                EC.innerHTML = `EC:${data.EC}`
             }).catch((err) => {
                 console.error(err);
             });
