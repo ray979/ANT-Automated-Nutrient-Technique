@@ -16,7 +16,9 @@ templates = Jinja2Templates(directory="templates")
 jinja_env = templates.env
 
 PH = 0
+EC = 0
 PH_TOPIC = 'sensor/ph'
+EC_TOPIC = 'sensor/ec'
 
 lock = threading.Lock()
 
@@ -27,13 +29,18 @@ def on_message(client, userdata, message):
         lock.acquire()
         PH = round(float(str(message.payload.decode("utf-8"))),2)
         lock.release()
+    if(message.topic == EC_TOPIC):
+        print(f'The message is {str(message.payload.decode("utf-8"))}')
+        lock.acquire()
+        EC = round(float(str(message.payload.decode("utf-8"))),2)
+        lock.release()
 
 
 
 client = mqtt.Client("ANT System Web API")
 client.on_message = on_message
 client.connect("localhost", 1883)
-client.subscribe(PH_TOPIC)
+client.subscribe([(PH_TOPIC,0), (EC_TOPIC,0)])
 client.loop_start()
 
 
@@ -48,7 +55,8 @@ def returndata():
     try:
         today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ph = PH
-        dat = {"time": today, "PH": PH}
+        ec = EC
+        dat = {"time": today, "PH": PH, "EC": EC}
         print(f"json: {dat}")
         return dat
     except Exception as e:
