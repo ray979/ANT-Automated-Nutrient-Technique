@@ -12,8 +12,10 @@ import models.models as _models
 from config.database import SessionLocal
 import schemas.schemas as _schemas
 
+#FastAPI router
 ant_router = APIRouter()
 
+#sensor readings and settings intial values
 PH = 0
 EC = 0
 PH_MIN = 0
@@ -21,6 +23,8 @@ PH_MAX = 0
 EC_MIN = 0
 LIGHT_ON_HOUR = 0
 LIGHT_OFF_HOUR = 0
+
+#MQTT Topic for ph and ec readings
 PH_TOPIC = 'sensor/ph'
 EC_TOPIC = 'sensor/ec'
 
@@ -39,7 +43,7 @@ topics = [
 #thread lock
 lock = threading.Lock()
 
-#On message for MQTT, obtain sensor readings from ANT backend through MQTT
+#On message for MQTT, obtain sensor readings and settings from ANT backend through MQTT
 def on_message(client, userdata, message):
     global PH
     global EC
@@ -114,6 +118,7 @@ def get_db():
         db.close()
 
 
+# Get a specific max number of query from sqlite database
 async def get_recent_sensordatas(maxquery, db: Session = Depends(get_db)):
     sensorDataList = db.query(_models.SensorData).order_by(_models.SensorData.id.desc()).limit(maxquery).all()
     return _schemas.listOfSensorDataEntity(sensorDataList)
@@ -125,15 +130,15 @@ async def get_lastest_sensordatas(db: Session = Depends(get_db)):
     return await get_recent_sensordatas(336, db) #return max data from recent week
 
 
-#add new sensordata
+#add new sensordata to database
 @ant_router.post('/sensordata')
 async def add_sensor_data(sensordata: _schemas.SensorDataCreate, db: Session = Depends(get_db)):
-    sensordata_model = _models.SensorData()
+    sensordata_model = _models.SensorData() #create variable with same database data format as set in models
     sensordata_model.ph_reading = sensordata.ph
     sensordata_model.ec_reading = sensordata.ec
 
-    db.add(sensordata_model)
-    db.commit()
+    db.add(sensordata_model) #add reading to database
+    db.commit() #commit to database
     return _schemas.sensorDataEntity(sensordata_model)
 
 #get current sensor readings (ie.last update to PH and EC from MQTT message)
@@ -149,6 +154,7 @@ async def get_current_sensordata():
     except Exception as e:
         print(f"err: {str(e)}")
 
+#Return settings as gotten from MQTT onmessage calls
 @ant_router.get('/settings')
 async def get_current_setting():
     try:
@@ -162,6 +168,7 @@ async def get_current_setting():
     except Exception as e:
         print(f"err: {str(e)}")
 
+#Publish new setting values from post to MQTT topics
 @ant_router.post('/settings')
 async def update_settings(settings: _schemas.Settings):
     client.publish(topics[2][0],settings.phmax)
@@ -170,6 +177,7 @@ async def update_settings(settings: _schemas.Settings):
     client.publish(topics[5][0],settings.lighthouron)
     client.publish(topics[6][0],settings.lighthouroff)
 
+#Delete record from database base on its id/index
 @ant_router.get('/deleteRecord/<int:id>')
 async def delete_sensordata(id, db: Session = Depends(get_db)):
     if(db.query(_models.SensorData).filter(_models.SensorData.id == id).delete()):
@@ -178,6 +186,7 @@ async def delete_sensordata(id, db: Session = Depends(get_db)):
 
     return f"SensorData with id:{id} does not exist, not deleted"
 
+#Search for list of sensordata from database based on date
 @ant_router.get('/searchSensorDatasByDate/<datetime.date:date>')
 async def search_sensordata_by_date(date, db: Session = Depends(get_db)):
     sensorDataList = db.query(_models.SensorData).filter(_models.SensorData.date_posted == date).all()
