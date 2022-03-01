@@ -147,8 +147,6 @@ def ec_sensing(pin):
 
 # method for ph balancing
 def ant_automation(ph_min, ph_max, ec_min):
-    global LAST_SAVED_TO_DATABASE
-    
     #Saving to database for first time
     if(LAST_SAVED_TO_DATABASE is None):
         save_sensordata_to_database(ph,ec)
