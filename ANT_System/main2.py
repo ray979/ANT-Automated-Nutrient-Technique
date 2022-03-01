@@ -105,13 +105,15 @@ client.loop_start()
 
 #method for saving sensordata into database
 def save_sensordata_to_database(ph,ec):
+    global LAST_SAVED_TO_DATABASE
     new_sensor_data = {
         "ph":ph,
         "ec":ec
     }
     try:
         request = requests.post("http://127.0.0.1:8000/sensordata", json.dumps(newsensordata,indent=3))
-        print(request.text)
+        if(request.status_code == 200):
+            LAST_SAVED_TO_DATABASE = datetime.datetime.now()
     except Exception as e:
         print("Could not save sensor data into database")
 
@@ -143,12 +145,10 @@ def ant_automation(ph_min, ph_max, ec_min):
     global LAST_SAVED_TO_DATABASE
     if(LAST_SAVED_TO_DATABASE is None):
         save_sensordata_to_database(ph,ec)
-        LAST_SAVED_TO_DATABASE = datetime.datetime.now()
     while True:
         if(LAST_SAVED_TO_DATABASE is not None):
             if((LAST_SAVED_TO_DATABASE + datetime.timedelta(minutes = 30)) <= datetime.datetime.now()):
                 save_sensordata_to_database(ph,ec)
-                LAST_SAVED_TO_DATABASE = datetime.datetime.now()
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
         if(ec_auto_code == 1):
             client.publish(AUTOMATION_TOPIC,"Nutrient A and B dosed")
