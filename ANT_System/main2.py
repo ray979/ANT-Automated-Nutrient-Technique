@@ -33,6 +33,7 @@ AUTOMATION_TOPIC = 'automation/pumps'
 #Last saved to database
 LAST_SAVED_TO_DATABASE = None
 
+#MQTT subscribe topics for settings
 settings_topic =[
     ('/PHMINSET',0),
     ('/PHMAXSET',0),
