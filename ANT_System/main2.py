@@ -140,10 +140,15 @@ def ec_sensing(pin):
 
 # method for ph balancing
 def ant_automation(ph_min, ph_max, ec_min):
+    global LAST_SAVED_TO_DATABASE
+    if(LAST_SAVED_TO_DATABASE is None):
+        save_sensordata_to_database(ph,ec)
+        LAST_SAVED_TO_DATABASE = datetime.datetime.now()
     while True:
         if(LAST_SAVED_TO_DATABASE is not None):
-            if((LAST_SAVED_TO_DATABASE + datetime.timedelta(minutes = 30)) < datetime.datetime.now()):
+            if((LAST_SAVED_TO_DATABASE + datetime.timedelta(minutes = 30)) <= datetime.datetime.now()):
                 save_sensordata_to_database(ph,ec)
+                LAST_SAVED_TO_DATABASE = datetime.datetime.now()
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
         if(ec_auto_code == 1):
             client.publish(AUTOMATION_TOPIC,"Nutrient A and B dosed")
