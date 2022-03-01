@@ -106,13 +106,18 @@ client.loop_start()
 #method for saving sensordata into database
 def save_sensordata_to_database(ph,ec):
     global LAST_SAVED_TO_DATABASE
+    
+    #data to be saved
     new_sensor_data = {
         "ph":ph,
         "ec":ec
     }
+    
     try:
+        # Make a post request to fastapi endpoint for storing sensor data, post data should be in json format
         request = requests.post("http://127.0.0.1:8000/sensordata", json.dumps(newsensordata,indent=3))
-        if(request.status_code == 200):
+        
+        if(request.status_code == 200): #only update last saved when status code is 200
             LAST_SAVED_TO_DATABASE = datetime.datetime.now()
     except Exception as e:
         print("Could not save sensor data into database")
@@ -122,7 +127,7 @@ def ph_sensing(pin):
     global ph
     while True:
         lock.acquire()
-        ph = ph_sensor.read_ph(pin)
+        ph = ph_sensor.read_ph(pin) #read ph
         lock.release()
         #publish ph reading to MQTT topic 'sensor/ph'
         client.publish(PH_TOPIC, round(ph, 2))
@@ -131,10 +136,9 @@ def ph_sensing(pin):
 #method for ec sensing
 def ec_sensing(pin):
     global ec
-    #time.sleep(0.5)
     while True:
         lock.acquire()
-        ec = ec_sensor.readEC(pin)
+        ec = ec_sensor.readEC(pin) #read ec
         lock.release()
         #publish ec reading to MQTT topic 'sensor/ec'
         client.publish(EC_TOPIC,ec)
@@ -143,28 +147,38 @@ def ec_sensing(pin):
 # method for ph balancing
 def ant_automation(ph_min, ph_max, ec_min):
     global LAST_SAVED_TO_DATABASE
+    
+    #Saving to database for first time
     if(LAST_SAVED_TO_DATABASE is None):
         save_sensordata_to_database(ph,ec)
+    
     while True:
+        #Save sensor readings to database before every automation cycle
         if(LAST_SAVED_TO_DATABASE is not None):
             if((LAST_SAVED_TO_DATABASE + datetime.timedelta(minutes = 30)) <= datetime.datetime.now()):
                 save_sensordata_to_database(ph,ec)
+        
+        #EC automation        
         ec_auto_code = automation.EC_balancing(ec, automation.EC_MIN)
-        if(ec_auto_code == 1):
+        if(ec_auto_code == 1): #ec dosing pumps were turned on
             client.publish(AUTOMATION_TOPIC,"Nutrient A and B dosed")
             time.sleep(1200) #wait 20 min for nutrients to mix
+        
+        #PH automation
         ph_auto_code = automation.ph_balancing(ph, ph_min, ph_max)
-        if(ph_auto_code == 1):
+        if(ph_auto_code == 1): #PH up pump turned on
             client.publish(AUTOMATION_TOPIC,"PH UP dosed")
             time.sleep(900) #wait 15 min for ph adjuster to mix
-        elif(ph_auto_code == 2):
+        elif(ph_auto_code == 2): #PH down pump turned on
             client.publish(AUTOMATION_TOPIC,"PH DOWN dosed")
             time.sleep(900)
+        
         #ten minute automation interval
         time.sleep(600)
 
 # method for light cycle
 def light_cycle():
+    #Intial startup of light cycle
     light_cycle_startup()
     while True:
         now = datetime.datetime.now()
@@ -172,6 +186,8 @@ def light_cycle():
         minute = now.minute
         second = now.second
         timestamp = now.strftime("%b %d, %Y %I:%M %p")
+        
+        #Turn on light if current time is at light on time and turn off lights if current time is at light off time
         if(get_time_weight(hour,minute) == get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
             if(not GPIO.input(LIGHT_PIN)):
                 GPIO.output(LIGHT_PIN,GPIO.HIGH)
@@ -183,23 +199,28 @@ def light_cycle():
                 print(f"Light is off at {timestamp}")
                 time.sleep(60-second+1)
 
+# method for turning time with hour and minutes to a weighted value
 def get_time_weight(hour,minute):
     return hour + (minute / 60)
 
-# method for light at startup
+# method for light at startup, determine initial light state
 def light_cycle_startup():
     now = datetime.datetime.now()
     hour = now.hour
     minute = now.minute
     timestamp = now.strftime("%b %d, %Y %I:%M %p")
+    
+    #if light off time is greater than light on time
     if(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) > get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
+        #if current time is between turn on time and turn off time, turn on light
         if(get_time_weight(hour,minute) >= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) and get_time_weight(hour,minute) < get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
             print(f"Light is on at {timestamp}")
         else:
             GPIO.output(LIGHT_PIN,GPIO.LOW)
             print(f"Light is off at {timestamp}")
-    elif(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)):
+    elif(get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN) < get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN)): #if light off time is less than light on time
+        #if current time is between turn on time and turn off time, turn on light
         if(get_time_weight(hour,minute) <= get_time_weight(LIGHT_ON_HOUR,LIGHT_ON_MIN) or get_time_weight(hour,minute) > get_time_weight(LIGHT_OFF_HOUR,LIGHT_OFF_MIN)):
             GPIO.output(LIGHT_PIN,GPIO.HIGH)
             print(f"Light is on at {timestamp}")
