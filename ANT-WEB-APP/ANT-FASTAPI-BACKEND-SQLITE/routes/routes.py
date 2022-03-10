@@ -123,12 +123,19 @@ async def get_recent_sensordatas(maxquery, db: Session = Depends(get_db)):
     sensorDataList = db.query(_models.SensorData).order_by(_models.SensorData.id.desc()).limit(maxquery).all()
     return _schemas.listOfSensorDataEntity(sensorDataList)
 
+async def query_all_sensordatas(db: Session = Depends(get_db)):
+    sensorDataList = db.query(_models.SensorData).order_by(_models.SensorData.id.desc()).all()
+    return _schemas.listOfSensorDataEntity(sensorDataList)
 
 #getting latest 30 sensorDatas
 @ant_router.get('/sensordatas')
 async def get_lastest_sensordatas(db: Session = Depends(get_db)):
     return await get_recent_sensordatas(336, db) #return max data from recent week
 
+#getting latest 30 sensorDatas
+@ant_router.get('/allsensordatas')
+async def get_all_sensordatas(db: Session = Depends(get_db)):
+    return await query_all_sensordatas(db) #return max data from recent week
 
 #add new sensordata to database
 @ant_router.post('/sensordata')
