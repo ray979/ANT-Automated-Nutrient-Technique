@@ -5,7 +5,7 @@ This system will include environmental sensors (PH, EC, and temperature) in whic
 *PH UP solution increases the PH and PH DOWN decreases the PH.*
 
 # Main Junction Box
-![ANT_Main_Juntion_Box](https://user-images.githubusercontent.com/81543048/159096678-b0b8ce7d-6843-44e4-8cee-ecaebb4a2d32.png=878x537)
+<img src="https://user-images.githubusercontent.com/81543048/159096678-b0b8ce7d-6843-44e4-8cee-ecaebb4a2d32.png" width="678">
 
 # FAR~~M~~S Stack Web APP Development
 ![ANT_FARM Stack](https://user-images.githubusercontent.com/81543048/158913606-9f3dc8c1-3369-4925-8cf2-6f89fc34f374.svg)
