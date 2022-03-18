@@ -7,3 +7,7 @@ This system will include environmental sensors (PH, EC, and temperature) in whic
 # FAR~~M~~S Stack Web APP Development
 ![ANT_FARM Stack](https://user-images.githubusercontent.com/81543048/158913606-9f3dc8c1-3369-4925-8cf2-6f89fc34f374.svg)
 
+# Video
+[![Watch the video](http://img.youtube.com/vi/HFA_pV7wh8E/maxresdefault.jpg)](https://www.youtube.com/watch?v=HFA_pV7wh8E)
+
+
