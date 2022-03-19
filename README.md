@@ -4,6 +4,8 @@ UCI Senior Design Project: ANT. ANT is an attempt at building an automated hydro
 This system will include environmental sensors (PH, EC, and temperature) in which data from these sensors will subsequently activate certain automations like automated fertilizer dosing under certain conditions like when low EC readings are detected or the EC reading is below range. Another automation this system would include will be automatic PH balancing where PH down or PH up will be dosed when the ph sensor readings are out of the desired range.
 *PH UP solution increases the PH and PH DOWN decreases the PH.*
 
+![WinterDesignPoster](https://user-images.githubusercontent.com/81543048/159098393-96f7ead3-0179-4e7b-8859-61037aa4678e.jpg)
+
 # Main Junction Box
 <img src="https://user-images.githubusercontent.com/81543048/159096678-b0b8ce7d-6843-44e4-8cee-ecaebb4a2d32.png" width="578">
 
