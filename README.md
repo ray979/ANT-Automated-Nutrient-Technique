@@ -13,6 +13,6 @@ This system will include environmental sensors (PH, EC, and temperature) in whic
 ![ANT_FARM Stack](https://user-images.githubusercontent.com/81543048/158913606-9f3dc8c1-3369-4925-8cf2-6f89fc34f374.svg)
 
 # Video
-[![Watch the video](https://i9.ytimg.com/vi/WNANxv6DUgE/mq1.jpg?sqp=CPDtxZsG&rs=AOn4CLCnlVXnMNzH7ReHkq8RqS9sMdHgiw)](https://www.youtube.com/watch?v=HFA_pV7wh8E)
+[![Watch the video](http://img.youtube.com/vi/HFA_pV7wh8E/maxresdefault.jpg)](https://www.youtube.com/watch?v=HFA_pV7wh8E)
 
 
